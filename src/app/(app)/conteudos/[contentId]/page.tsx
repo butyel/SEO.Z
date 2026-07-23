@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, FileText, Calendar, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import { AIPanel } from "@/components/ai/ai-panel"
 
 interface PageProps {
   params: Promise<{ contentId: string }>
@@ -150,6 +151,8 @@ export default async function ConteudoDetailPage({ params }: PageProps) {
           </CardContent>
         </Card>
       )}
+
+      <AIPanel contentId={contentId} />
     </div>
   )
 }
