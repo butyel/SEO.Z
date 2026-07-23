@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, ExternalLink, MapPin } from "lucide-react"
+import { Loader2, ExternalLink, MapPin, AlertTriangle } from "lucide-react"
+import Link from "next/link"
 
 interface GoogleLocation {
   id: string
@@ -24,6 +25,7 @@ export default function IntegracoesPage() {
   const [connection, setConnection] = useState<{ status: string; email: string | null } | null>(null)
   const [locations, setLocations] = useState<GoogleLocation[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -38,9 +40,12 @@ export default function IntegracoesPage() {
       const connData = await connRes.json()
       const locData = await locRes.json()
       setConnection(connData)
+      if (locData.error) {
+        setError(locData.error)
+      }
       if (locData.locations) setLocations(locData.locations)
     } catch {
-      // ignore
+      setError("Erro ao carregar dados do Google")
     } finally {
       setLoading(false)
     }
@@ -93,7 +98,26 @@ export default function IntegracoesPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {locations.length === 0 ? (
+              {error && (
+                <div className="flex items-start gap-2 rounded-md bg-yellow-500/10 p-3 text-sm text-yellow-700">
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium">API do Google ainda sem acesso</p>
+                    <p className="mt-1">{error}</p>
+                    <p className="mt-2">
+                      Solicite acesso em:{" "}
+                      <Link
+                        href="https://support.google.com/business/contact/api_default"
+                        target="_blank"
+                        className="text-primary hover:underline"
+                      >
+                        support.google.com/business/contact/api_default
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              )}
+              {locations.length === 0 && !error ? (
                 <p className="text-sm text-muted-foreground">
                   Nenhuma unidade encontrada no Google Business Profile.
                 </p>
