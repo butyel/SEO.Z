@@ -53,7 +53,7 @@ export default function NovaEmpresaPage() {
     const result = companySchema.safeParse(form)
     if (!result.success) {
       const fieldErrors: Record<string, string> = {}
-      result.error.issues.forEach((err: { path: (string | number)[]; message: string }) => {
+      result.error.issues.forEach((err) => {
         const field = err.path[0] as string
         fieldErrors[field] = err.message
       })
