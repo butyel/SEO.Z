@@ -42,3 +42,11 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# supabase temp
+supabase/.temp/
+
+# temp files
+*.tmp
+output.txt
+body.json
