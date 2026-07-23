@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, ExternalLink, MapPin, Unlink } from "lucide-react"
+import { Loader2, ExternalLink, MapPin } from "lucide-react"
 
 interface GoogleLocation {
   id: string
@@ -24,26 +24,10 @@ export default function IntegracoesPage() {
   const [connection, setConnection] = useState<{ status: string; email: string | null } | null>(null)
   const [locations, setLocations] = useState<GoogleLocation[]>([])
   const [loading, setLoading] = useState(true)
-  const [connecting, setConnecting] = useState(false)
 
   useEffect(() => {
     loadData()
   }, [])
-
-  async function handleConnect() {
-    setConnecting(true)
-    try {
-      const res = await fetch("/api/google/auth")
-      const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-      }
-    } catch {
-      // ignore
-    } finally {
-      setConnecting(false)
-    }
-  }
 
   async function loadData() {
     try {
@@ -100,13 +84,11 @@ export default function IntegracoesPage() {
               <p className="text-sm text-muted-foreground">
                 Conecte sua conta do Google para gerenciar este perfil diretamente.
               </p>
-              <Button onClick={handleConnect} disabled={connecting}>
-                {connecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
+              <Button asChild>
+                <a href="/api/google/auth">
                   <ExternalLink className="h-4 w-4 mr-2" />
-                )}
-                {connecting ? "Conectando..." : "Conectar Google"}
+                  Conectar Google
+                </a>
               </Button>
             </div>
           ) : (

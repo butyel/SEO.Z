@@ -26,7 +26,6 @@ export default function ConfigGooglePage() {
   const [connection, setConnection] = useState<Connection | null>(null)
   const [status, setStatus] = useState<IntegrationStatus | null>(null)
   const [loading, setLoading] = useState(true)
-  const [connecting, setConnecting] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   useEffect(() => {
@@ -54,23 +53,6 @@ export default function ConfigGooglePage() {
       // ignore
     } finally {
       setLoading(false)
-    }
-  }
-
-  async function handleConnect() {
-    setConnecting(true)
-    try {
-      const res = await fetch("/api/google/auth")
-      const data = await res.json()
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        setMessage({ type: "error", text: data.error || "Erro ao conectar" })
-      }
-    } catch {
-      setMessage({ type: "error", text: "Erro ao iniciar conexão" })
-    } finally {
-      setConnecting(false)
     }
   }
 
@@ -199,16 +181,11 @@ export default function ConfigGooglePage() {
               Desconectar
             </Button>
           ) : (
-            <Button
-              onClick={handleConnect}
-              disabled={connecting || !status?.hasClientId || !status?.enabled}
-            >
-              {connecting ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : (
+            <Button asChild disabled={!status?.hasClientId || !status?.enabled}>
+              <a href="/api/google/auth">
                 <ExternalLink className="h-4 w-4 mr-2" />
-              )}
-              {connecting ? "Conectando..." : "Conectar Google"}
+                Conectar Google
+              </a>
             </Button>
           )}
         </CardFooter>

@@ -8,21 +8,25 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
+      return NextResponse.redirect(
+        new URL("/login", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")
+      )
     }
 
     const isEnabled = process.env.GOOGLE_INTEGRATION_ENABLED === "true"
 
     if (!isEnabled) {
-      return NextResponse.json({ error: "Integração Google desabilitada. Configure GOOGLE_INTEGRATION_ENABLED=true." })
+      return NextResponse.redirect(
+        new URL("/configuracoes/google?error=Integração+Google+desabilitada", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")
+      )
     }
 
     const url = generateAuthUrl(user.id)
-    return NextResponse.json({ url })
+    return NextResponse.redirect(url)
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Erro ao gerar URL de autenticação" },
-      { status: 500 }
+    const errorMsg = error instanceof Error ? error.message : "Erro desconhecido"
+    return NextResponse.redirect(
+      new URL("/configuracoes/google?error=" + encodeURIComponent(errorMsg), process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")
     )
   }
 }
