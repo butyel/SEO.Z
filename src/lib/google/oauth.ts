@@ -130,16 +130,37 @@ export async function storeTokens(
   const encryptedAccess = encrypt(accessToken)
   const encryptedRefresh = refreshToken ? encrypt(refreshToken) : null
 
-  const { error } = await supabase.from("google_connections").upsert({
-    owner_id: userId,
-    email,
-    access_token_encrypted: encryptedAccess,
-    refresh_token_encrypted: encryptedRefresh,
-    expires_at: new Date(expiresAt).toISOString(),
-    status: "connected",
-  }, { onConflict: "owner_id" })
+  const { data: existing } = await supabase
+    .from("google_connections")
+    .select("id")
+    .eq("owner_id", userId)
+    .maybeSingle()
 
-  if (error) throw new Error(`Failed to store tokens: ${error.message}`)
+  if (existing) {
+    const { error } = await supabase
+      .from("google_connections")
+      .update({
+        email,
+        access_token_encrypted: encryptedAccess,
+        refresh_token_encrypted: encryptedRefresh,
+        expires_at: new Date(expiresAt).toISOString(),
+        status: "connected",
+      })
+      .eq("id", existing.id)
+
+    if (error) throw new Error(`Failed to update tokens: ${error.message}`)
+  } else {
+    const { error } = await supabase.from("google_connections").insert({
+      owner_id: userId,
+      email,
+      access_token_encrypted: encryptedAccess,
+      refresh_token_encrypted: encryptedRefresh,
+      expires_at: new Date(expiresAt).toISOString(),
+      status: "connected",
+    })
+
+    if (error) throw new Error(`Failed to store tokens: ${error.message}`)
+  }
 }
 
 export async function getStoredTokens(userId: string): Promise<{ accessToken: string; refreshToken: string | null } | null> {
